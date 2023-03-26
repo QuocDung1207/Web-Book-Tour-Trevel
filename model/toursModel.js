@@ -1,7 +1,8 @@
 /* eslint-disable import/no-extraneous-dependencies */
 // eslint-disable-next-line import/no-extraneous-dependencies
 const mongoose = require("mongoose");
-const slugify = require("slugify");
+// const slugify = require("slugify");
+const validator = require("validator");
 
 const tourSchema = new mongoose.Schema(
   {
@@ -10,7 +11,8 @@ const tourSchema = new mongoose.Schema(
       requied: [true, "A tours must have  name"],
       unique: true,
       maxlength: [40, "A tour name must have less or equal then 40 characters"],
-      munlength: [10, "A tour name must have less or equal then 10 characters"],
+      minlength: [10, "A tour name must have less or equal then 10 characters"],
+      validate: [validator.isAlpha, "Tour must only contain  characters "],
     },
     slug: String,
     duration: {
@@ -24,10 +26,16 @@ const tourSchema = new mongoose.Schema(
     difficulty: {
       type: String,
       requied: [true, "A tour must have a difficulty"],
+      enum: {
+        values: ["dificult", "easy", "medium"],
+        // message: "Difficulty is either : easy , medium , dificult ",
+      },
     },
     ratingsAverage: {
       type: Number,
       default: 4.5,
+      min: [1, "Rating must be above 1.0"],
+      max: [5, "Rating must be below 5.0"],
     },
     ratingsQuantity: {
       type: Number,
@@ -37,7 +45,16 @@ const tourSchema = new mongoose.Schema(
       type: Number,
       requied: [true, "A tour must have a price"],
     },
-    priceDiscount: Number,
+    priceDiscount: {
+      type: Number,
+      validate: {
+        validator: function (val) {
+          // this only points to current doc on NEW document creation
+          return val < this.price;
+        },
+        message: "Discount price ({VALUE}) should be below regular price",
+      },
+    },
     summary: {
       type: String,
       trim: [true, "A tour must have a description"],
@@ -71,6 +88,7 @@ const tourSchema = new mongoose.Schema(
 tourSchema.virtual("durationWeeks").get(function () {
   return this.duration / 7;
 });
+
 //DOCUMENT MIDDLEWARE: runs before .save() and .create()
 // tourSchema.pre("save", (next) => {
 //   this.slug = slugify(this.name, { lower: true });

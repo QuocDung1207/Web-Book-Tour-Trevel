@@ -1,6 +1,7 @@
 /* eslint-disable no-unused-vars */
 const Tour = require("../model/toursModel");
 const APIFeatures = require("../utils/apiFeatures");
+const catchAsync = require("../utils/catchAsync");
 
 exports.aliasTopTours = (req, res, next) => {
   req.query.limit = "5";
@@ -51,27 +52,15 @@ exports.getTours = async (req, res) => {
   }
 };
 
-exports.CreateTours = async (req, res) => {
-  try {
-    const newTour = await Tour.create(req.body);
-    // eslint-disable-next-line no-console
-    console.log(newTour);
-    res.status(201).json({
-      status: "success",
-      data: {
-        tour: newTour,
-      },
-    });
-  } catch (err) {
-    console.log(err);
-    res.status(404).json({
-      status: "fail",
-      message: err,
-    });
-  }
-  // const newTour = new Tour({});
-  // newTour.save();
-};
+exports.CreateTours = catchAsync(async (req, res, next) => {
+  const newTour = await Tour.create(req.body);
+  res.status(201).json({
+    status: "success",
+    data: {
+      tour: newTour,
+    },
+  });
+});
 
 exports.updateTours = async (req, res) => {
   try {
