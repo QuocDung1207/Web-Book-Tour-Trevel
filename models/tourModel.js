@@ -110,14 +110,6 @@ const tourSchema = new mongoose.Schema(
         ref: "User",
       },
     ],
-    // reviews: [
-    //   {
-    //     type: mongoose.Schema.ObjectId,
-    //     ref: "Review",
-    //     foreignField: "tour",
-    //     localField: "_id",
-    //   },
-    // ],
   },
   {
     toJSON: { virtuals: true },
@@ -133,6 +125,7 @@ tourSchema.index({ startLocation: "2dsphere" });
 tourSchema.virtual("durationWeeks").get(function () {
   return this.duration / 7;
 });
+
 // Virtual populate
 tourSchema.virtual("reviews", {
   ref: "Review",
